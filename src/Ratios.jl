@@ -45,7 +45,13 @@ julia> x+z
 SimpleRatio{$Int}(3, 8)
 ```
 """
-SimpleRatio(num::Integer, den::Integer) = SimpleRatio(promote(num, den)...)
+function SimpleRatio(num::Integer, den::Integer)
+    p, q = promote(num, den)
+    # reduce by greatest common divisor, which is power of 2
+    t = trailing_zeros(p|q)
+    # x//0 -> (x/2^k)//0
+    SimpleRatio(p>>t, q>>t)
+end
 
 convert(::Type{BigFloat}, r::SimpleRatio{S}) where {S} = BigFloat(r.num)/r.den
 function convert(::Type{T}, r::SimpleRatio{S}) where {T<:AbstractFloat,S}
@@ -68,10 +74,8 @@ Rational{T}(r::SimpleRatio{S}) where {T<:Integer, S<:Integer} = convert(T, r.num
 /(x::Integer, y::SimpleRatio) = SimpleRatio(x*y.den, y.num)
 +(x::Integer, y::SimpleRatio) = SimpleRatio(x*y.den + y.num, y.den)
 -(x::Integer, y::SimpleRatio) = SimpleRatio(x*y.den - y.num, y.den)
-+(x::SimpleRatio, y::SimpleRatio) = x.den == y.den ? SimpleRatio(x.num + y.num, x.den) :
-                                                     SimpleRatio(x.num*y.den + x.den*y.num, x.den*y.den)
--(x::SimpleRatio, y::SimpleRatio) = x.den == y.den ? SimpleRatio(x.num - y.num, x.den) :
-                                                     SimpleRatio(x.num*y.den - x.den*y.num, x.den*y.den)
++(x::SimpleRatio, y::SimpleRatio) = SimpleRatio(x.num*y.den + x.den*y.num, x.den*y.den)
+-(x::SimpleRatio, y::SimpleRatio) = SimpleRatio(x.num*y.den - x.den*y.num, x.den*y.den)
 ^(x::SimpleRatio, y::Integer) = SimpleRatio(x.num^y, x.den^y)
 
 -(x::SimpleRatio{T}) where {T<:Signed} = SimpleRatio(-x.num, x.den)
