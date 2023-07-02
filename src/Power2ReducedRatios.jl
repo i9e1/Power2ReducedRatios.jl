@@ -8,7 +8,7 @@ API summary:
 - `common_denominator` standardizes a collection of `SimpleRatio`s to have the same denominator,
   making some arithmetic operations among them less likely to overflow.
 """
-module Ratios
+module Power2ReducedRatios
 
 import Base: convert, promote_rule, *, /, +, -, ^, ==, decompose, isinteger
 

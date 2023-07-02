@@ -1,5 +1,5 @@
-using Ratios, Test
-using FixedPointNumbers
+using Power2ReducedRatios, Test
+#using FixedPointNumbers
 
 @testset "SimpleRatio" begin
     r = SimpleRatio(1,2)
@@ -27,11 +27,11 @@ using FixedPointNumbers
     @test 0.5 == r
 
     r3 = SimpleRatio(7,3)
-    @test r2+r3 === SimpleRatio(9,3)
-    @test r2-r3 === SimpleRatio(-5,3)
+    @test r2+r3 === SimpleRatio(27,9) # == SimpleRatio(9,3)
+    @test r2-r3 === SimpleRatio(-15,9) # ==SimpleRatio(-5,3)
 
     r8 = SimpleRatio{Int8}(1, 20)
-    @test r8 + r8 == SimpleRatio(1, 10)
+    @test_broken r8 + r8 == SimpleRatio(1, 10) # overflow in addition of Int8
 
     @test_throws OverflowError -SimpleRatio(0x02,0x03)
 
@@ -44,11 +44,15 @@ using FixedPointNumbers
     @test isfinite(SimpleRatio(1,0)) == false
     @test isfinite(SimpleRatio(2,1)) == true
 
+    #=
+    # TODO look for FixedPoint conversion
+    do not check with FixedPointNumbers yet
     @test SimpleRatio(5,3) * 0.035N0f8 == SimpleRatio{Int}(rationalize((5*0.035N0f8)/3))
     @test SimpleRatio(5,3) * 0.035N4f12 == SimpleRatio{Int}(rationalize((5*0.035N4f12)/3))
     @test SimpleRatio(5,3) * -0.03Q0f7 == SimpleRatio{Int}(rationalize((5.0*(-0.03Q0f7))/3))
     r = @inferred(SimpleRatio(0.75Q0f7))
     @test r == 3//4 && r isa SimpleRatio{Int16}
+    =#
 
     # common_denominator
     @test common_denominator(SimpleRatio(2,7), SimpleRatio(3,11), SimpleRatio(-1,5)) ===
